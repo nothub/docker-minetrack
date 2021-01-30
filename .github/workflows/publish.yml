@@ -29,6 +29,5 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/minetrack:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/minetrack:${{ env.EPOCH }}
       - name: image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

@@ -6,12 +6,12 @@ ARG TINI="https://github.com/krallin/tini/releases/download/v0.19.0/tini"
 
 # apt update
 RUN apt-get update                                                   \
- && apt-get upgrade    --quiet --yes --with-new-pkgs                 \
 # apt install sqlite3
  && apt-get install    --quiet --yes --no-install-recommends sqlite3 \
 # apt cleanup
  && apt-get clean      --quiet --yes                                 \
- && apt-get autoremove --quiet --yes
+ && apt-get autoremove --quiet --yes                                 \
+ && rm -rf /var/lib/apt/lists/*
 
 # install tini
 RUN curl --location $TINI --output /tini \

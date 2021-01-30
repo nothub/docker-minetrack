@@ -2,14 +2,20 @@ FROM node:15
 
 ARG REPO="https://github.com/Cryptkeeper/Minetrack.git"
 ARG SERVERS="https://github.com/neckbeard-cc/servers/releases/latest/download/servers.json"
+ARG TINI="https://github.com/krallin/tini/releases/download/v0.19.0/tini"
 
-RUN apt-get update  \
- && apt-get upgrade --quiet --assume-yes \
- && apt-get install --quiet --assume-yes --no-install-recommends \
- curl    \
- git     \
- make    \
- sqlite3
+# apt update
+RUN apt-get update                                                   \
+ && apt-get upgrade    --quiet --yes --with-new-pkgs                 \
+# apt install sqlite3
+ && apt-get install    --quiet --yes --no-install-recommends sqlite3 \
+# apt cleanup
+ && apt-get clean      --quiet --yes                                 \
+ && apt-get autoremove --quiet --yes
+
+# install tini
+RUN curl --location $TINI --output /tini \
+ && chmod +x /tini
 
 WORKDIR /usr/src/minetrack
 
@@ -22,25 +28,17 @@ RUN git clone $REPO /tmp/minetrack     \
  && mv /tmp/minetrack/.eslintrc.json . \
  && mv /tmp/minetrack/LICENSE .        \
  && mv /tmp/minetrack/main.js .        \
- && rm -rf /tmp/minetrack              \
+ && rm -rf /tmp/minetrack
+
 # prepare config
- && sed -i 's/"logFailedPings": true/"logFailedPings": false/g' config.json \
+RUN sed -i 's/"logFailedPings": true/"logFailedPings": false/g' config.json \
  && sed -i 's/"pingAll": 3000/"pingAll": 10000/g' config.json \
  && rm -f servers.json \
-# download servers.json
- && curl --location $SERVERS -o servers.json
+ && curl --location $SERVERS --output servers.json
 
 # build minetrack
 RUN npm install --build-from-source \
  && npm run build
-
-# clean apt packages
-RUN apt-get purge --quiet --assume-yes \
- curl \
- git  \
- make \
- && apt-get clean      --quiet --assume-yes \
- && apt-get autoremove --quiet --assume-yes
 
 # run as non root
 RUN addgroup --gid 10043 --system minetrack \
@@ -49,4 +47,4 @@ USER minetrack
 
 EXPOSE 8080
 
-CMD ["node", "main.js"]
+ENTRYPOINT ["/tini", "--", "node", "main.js"]

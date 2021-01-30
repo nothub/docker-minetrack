@@ -1,0 +1,8 @@
+*
+!*/
+!/.editorconfig
+!/.github/**
+!/.gitignore
+!/.idea/runConfigurations/**
+!/Dockerfile
+!/README.md

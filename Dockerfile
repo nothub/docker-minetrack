@@ -31,8 +31,9 @@ RUN git clone $REPO /tmp/minetrack     \
  && rm -rf /tmp/minetrack
 
 # prepare config
-RUN sed -i 's/"logFailedPings": true/"logFailedPings": false/g' config.json \
- && sed -i 's/"pingAll": 3000/"pingAll": 10000/g' config.json \
+RUN sed -i 's/"pingAll": 3000/"pingAll": 10000/g' config.json \
+ && sed -i 's/"logFailedPings": true/"logFailedPings": false/g' config.json \
+ && sed -i 's/"logToDatabase": false/"logToDatabase": true/g' config.json \
  && rm -f servers.json \
  && curl --location $SERVERS --output servers.json
 
@@ -43,6 +44,7 @@ RUN npm install --build-from-source \
 # run as non root
 RUN addgroup --gid 10043 --system minetrack \
  && adduser  --uid 10042 --system --ingroup minetrack --no-create-home --gecos "" minetrack
+RUN chown -R minetrack:minetrack /usr/src/minetrack
 USER minetrack
 
 EXPOSE 8080

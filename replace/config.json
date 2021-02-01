@@ -1,0 +1,16 @@
+{
+    "site": {
+        "port": 8080,
+        "ip": "0.0.0.0"
+    },
+    "rates": {
+        "updateMojangStatus": 5000,
+        "mojangStatusTimeout": 3500,
+        "pingAll": 10000,
+        "connectTimeout": 2500
+    },
+    "logFailedPings": false,
+    "logToDatabase": true,
+    "graphDuration": 86400000,
+    "serverGraphDuration": 180000
+}

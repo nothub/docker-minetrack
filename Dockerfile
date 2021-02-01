@@ -1,14 +1,11 @@
-FROM node:15
+FROM node:lts
 
 ARG REPO="https://github.com/Cryptkeeper/Minetrack.git"
 ARG SERVERS="https://github.com/neckbeard-cc/servers/releases/latest/download/servers.json"
 ARG TINI="https://github.com/krallin/tini/releases/download/v0.19.0/tini"
 
-# apt update
 RUN apt-get update                                                   \
-# apt install sqlite3
  && apt-get install    --quiet --yes --no-install-recommends sqlite3 \
-# apt cleanup
  && apt-get clean      --quiet --yes                                 \
  && apt-get autoremove --quiet --yes                                 \
  && rm -rf /var/lib/apt/lists/*
@@ -30,11 +27,11 @@ RUN git clone $REPO /tmp/minetrack     \
  && mv /tmp/minetrack/main.js .        \
  && rm -rf /tmp/minetrack
 
-# prepare config
-RUN sed -i 's/"pingAll": 3000/"pingAll": 10000/g' config.json \
- && sed -i 's/"logFailedPings": true/"logFailedPings": false/g' config.json \
- && sed -i 's/"logToDatabase": false/"logToDatabase": true/g' config.json \
- && rm -f servers.json \
+# replace some files
+COPY replace/. .
+
+# fetch servers.json
+RUN rm -f servers.json \
  && curl --location $SERVERS --output servers.json
 
 # build minetrack
@@ -43,8 +40,8 @@ RUN npm install --build-from-source \
 
 # run as non root
 RUN addgroup --gid 10043 --system minetrack \
- && adduser  --uid 10042 --system --ingroup minetrack --no-create-home --gecos "" minetrack
-RUN chown -R minetrack:minetrack /usr/src/minetrack
+ && adduser  --uid 10042 --system --ingroup minetrack --no-create-home --gecos "" minetrack \
+ && chown -R minetrack:minetrack /usr/src/minetrack
 USER minetrack
 
 EXPOSE 8080
